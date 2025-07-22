@@ -16,6 +16,7 @@ func Send(name, description string) error {
 	if len(message) > MaxLength {
 		return fmt.Errorf("message too long: %d characters", len(message))
 	}
+
 	token := os.Getenv("TELEGRAM_BOT_TOKEN")
 	chatID := os.Getenv("TELEGRAM_CHAT_ID")
 	if token == "" || chatID == "" {

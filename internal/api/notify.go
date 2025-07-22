@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"sync"
+	"time"
 	"github.com/gin-gonic/gin"
 	"Coding_Challenge/internal/telegram"
 )
@@ -14,6 +15,7 @@ type Notification struct {
 }
 
 var (
+	telegramLimiter   = time.NewTicker(1 * time.Second)
 	notifications     []Notification
 	notificationsLock sync.Mutex
 )
@@ -29,13 +31,15 @@ func handleNotification(c *gin.Context) {
 		return
 	}
 
-	// Store all notifications
+	// store all notifications
 	notificationsLock.Lock()
 	notifications = append(notifications, notif)
 	notificationsLock.Unlock()
 
-	// Only forward warnings
+	// only forward warnings
 	if notif.Type == "Warning" {
+		<-telegramLimiter.C
+
 		if err := telegram.Send(notif.Name, notif.Description); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
