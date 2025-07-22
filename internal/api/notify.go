@@ -2,7 +2,9 @@ package api
 
 import (
 	"net/http"
+	"sync"
 	"github.com/gin-gonic/gin"
+
 )
 
 type Notification struct {
@@ -11,7 +13,10 @@ type Notification struct {
 	Description string `json:"Description"`
 }
 
-var	notifications	[]Notification
+var (
+	notifications     []Notification
+	notificationsLock sync.Mutex
+)
 
 func RegisterRoutes(r *gin.Engine) {
 	r.POST("/notify", handleNotification)
@@ -24,6 +29,8 @@ func handleNotification(c *gin.Context) {
 		return
 	}
 
-	// Store all notifications
+	// Store all notifications 
+	notificationsLock.Lock()
 	notifications = append(notifications, notif)
+	notificationsLock.Unlock()
 }

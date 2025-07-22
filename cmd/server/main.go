@@ -7,11 +7,13 @@ import (
 	"Coding_Challenge/internal/api"
 )
 
-func main() {
+func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Println(".env file failed to load")
 	}
+}
 
+func main() {
 	r := gin.Default()
 	api.RegisterRoutes(r)
 
