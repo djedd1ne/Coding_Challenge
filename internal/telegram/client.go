@@ -8,8 +8,14 @@ import (
 	"os"
 )
 
+// max length of telegram message
+const MaxLength = 4096
+
 func Send(name, description string) error {
 	message := fmt.Sprintf("%s\n%s", name, description)
+	if len(message) > MaxLength {
+		return fmt.Errorf("message too long: %d characters", len(message))
+	}
 	token := os.Getenv("TELEGRAM_BOT_TOKEN")
 	chatID := os.Getenv("TELEGRAM_CHAT_ID")
 	if token == "" || chatID == "" {
