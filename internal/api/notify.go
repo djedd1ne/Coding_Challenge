@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync"
 	"github.com/gin-gonic/gin"
-
+	"Coding_Challenge/internal/telegram"
 )
 
 type Notification struct {
@@ -29,8 +29,20 @@ func handleNotification(c *gin.Context) {
 		return
 	}
 
-	// Store all notifications 
+	// Store all notifications
 	notificationsLock.Lock()
 	notifications = append(notifications, notif)
 	notificationsLock.Unlock()
+
+	// Only forward warnings
+	if notif.Type == "Warning" {
+		if err := telegram.Send(notif.Name, notif.Description); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "forwarded"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "ignored"})
 }
